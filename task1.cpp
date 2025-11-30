@@ -1,10 +1,9 @@
-#include <iostream>
-#include <sstream>
 #include <string>
+#include <iostream>
 #include <vector>
-#include <map>
-#include <stdexcept>
+#include <unordered_map>
 #include <unordered_set>
+#include <sstream>
 
 std::vector<std::string> split(const std::string& s, char delim) {
     std::vector<std::string> result;
@@ -18,29 +17,12 @@ std::vector<std::string> split(const std::string& s, char delim) {
     return result;
 }
 
-
-int count_workers(const std::string& s) {
+int count_workers(int K, const std::vector<std::string>& projects) {
     int result = 0;
 
-    std::istringstream iss(s);
-    std::vector<std::string> projects;
-    std::string p;
+    std::unordered_map<std::string, int> jobs; // here we count n of projects for each worker
 
-    while (iss >> p) {
-        //pushing each project into the vector
-        projects.push_back(p);
-    }
-
-    if (projects.empty()) {
-        throw std::invalid_argument("count_workers: empty input string");
-    }
-
-    int K = std::stoi(projects[0]); //K
-    projects.erase(projects.begin()); // deleting it
-
-    std::map<std::string, int> jobs; // here we count n of projects for each worker
-
-    for (std::string& project : projects) {
+    for (const std::string& project : projects) {
         std::vector<std::string> divided = split(project, ':');
 
         if (divided.size() < 2) continue;
@@ -69,11 +51,29 @@ int count_workers(const std::string& s) {
 }
 
 int main(){
-//    std::string s = "2 web:1,2,3 mobile:2,3,4 api:1,2,5 database:3,4,5";
-    std::string s = "1 alpha:1,1";
-//    std::string s = "1 core:10,20,30 ui:20,30,40 devops:30,40,50 data:10,30,50";
-    int res = count_workers(s);
-    std::cout << res<< std::endl;
+    std::string line;
+    if (!std::getline(std::cin, line)) {
+        std::cerr << "No input\n";
+        return 1;
+    }
+
+    std::istringstream iss(line);
+
+    int K;
+    if (!(iss >> K)) {
+        std::cerr << "Invalid input: first token must be integer K\n";
+        return 1;
+    }
+
+    std::vector<std::string> projects;
+    std::string token;
+
+    while (iss >> token) {
+        projects.push_back(token);
+    }
+
+    int res = count_workers(K, projects);
+    std::cout << res << std::endl;
 
     return 0;
 }
